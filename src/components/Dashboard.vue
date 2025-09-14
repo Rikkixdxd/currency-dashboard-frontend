@@ -4,7 +4,7 @@
       <v-autocomplete
         v-if="!currencyStore.selectedCurrency"
         v-model="searchCurrency"
-        :items="currencyStore.currencyList"
+        :items="currencyStore.currencyCodeList"
         item-title="code"
         item-value="code"
         label="Выберите валюту"
@@ -16,17 +16,26 @@
       />
       <v-card
         v-else
-        class="currency-card d-flex flex-column align-center justify-center text-center position-relative"
+        class="currency-card cursor-pointer d-flex align-center justify-center text-center position-relative"
         outlined
         color="primary"
         dark
       >
+        <button
+          class="delete-btn h-100 justify-center align-center bg-red-darken-4 w-50 position-absolute left-0"
+          @click="currencyStore.clearSelection"
+        >
+          <v-icon icon="mdi-delete" class="text-h4" />
+        </button>
         <div class="text-h6 font-weight-bold">
-          {{ currencyStore.selectedCurrency.symbol }}
-          {{ currencyStore.selectedCurrency.code }}
+          {{ currencyStore.selectedCurrency }}
         </div>
-        <button class="delete-btn" @click="currencyStore.clearSelection">
-          <v-icon icon="mdi-delete" />
+        <button
+          class="favor-btn h-100 w-50 bg-amber-lighten-2 position-absolute right-0"
+          @click="currencyStore.switchFavor(currencyStore.selectedCurrency)"
+          :class="currencyStore.favoriteCurrencies.has(currencyStore.selectedCurrency) ? 'text-white' : 'text-grey'"
+        >
+          <v-icon icon="mdi-star" class="text-h4" />
         </button>
       </v-card>
     </div>
@@ -42,6 +51,7 @@
         >
           <v-card
             class="d-flex flex-column align-center justify-center text-center"
+            :class="{'bg-amber-lighten-4': currencyStore.favoriteCurrencies.has(pair.target) || currencyStore.favoriteCurrencies.has(pair.base)}"
             outlined
             style="height: 70px"
           >
@@ -55,31 +65,29 @@
 
       <template v-else>
         <v-col
-          v-for="currency in currencyStore.currencyList"
-          :key="currency.code"
+          v-for="currency in currencyStore.currencyListToSelected[
+            currencyStore.selectedCurrency
+          ]"
+          :key="currency.target"
           cols="6"
           sm="4"
           md="2"
         >
           <v-card
-            :class="{
-              'bg-primary text-white opacity-70':
-                currency.code === currencyStore.selectedCurrency?.code,
-            }"
-            :disabled="currency.code === currencyStore.selectedCurrency?.code"
             class="d-flex flex-column align-center justify-center text-center"
+            :class="{'bg-amber-lighten-4': currencyStore.favoriteCurrencies.has(currency.target)}"
             outlined
             style="height: 70px"
-            @click="currencyStore.selectCurrency(currency)"
+            @click="currencyStore.selectCurrency(currency.target)"
           >
             <div class="text-h6">
-              {{ currency.code }}
+              {{ currency.target }}
             </div>
             <div
-              v-if="currency.code !== currencyStore.selectedCurrency?.code"
+              v-if="currency.target !== currencyStore.selectedCurrency"
               class="text-subtitle-1"
             >
-              {{ convertRate(currencyStore.selectedCurrency, currency).toFixed(2) }}
+              {{ currency.rate.toFixed(4) }}
             </div>
           </v-card>
         </v-col>
@@ -89,23 +97,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
-import { useCurrency } from "@/stores/currency"
+import { ref } from "vue";
+import { useCurrency } from "@/stores/useCurrencyStore";
+import { onMounted } from "vue";
 
-const currencyStore = useCurrency()
-const searchCurrency = ref(null)
+const currencyStore = useCurrency();
+const searchCurrency = ref(null);
 
 function onCurrencySelect(code) {
-  const found = currencyStore.currencyList.find((c) => c.code === code)
-  if (found) {
-    currencyStore.selectCurrency(found)
-    searchCurrency.value = null
-  }
+  currencyStore.selectCurrency(code);
+  searchCurrency.value = null;
 }
 
-function convertRate(base, target) {
-  return target.rate / base.rate
-}
+onMounted(() => {
+  currencyStore.fetchPopularPairs(); // сразу при загрузке
+  setInterval(() => {
+    if (!currencyStore.selectedCurrency) {
+      // currencyStore.fetchPopularPairs()
+    } else {
+      // currencyStore.fetchCurrency(currencyStore.selectedCurrency)
+    }
+  }, 5000);
+});
 </script>
 
 <style scoped>
@@ -116,25 +129,15 @@ function convertRate(base, target) {
 .currency-card {
   width: 250px;
   height: 70px;
-  cursor: pointer;
   transition: background-color 0.2s;
 }
-.currency-card:hover {
-  background-color: darkred !important;
-}
-.currency-card:hover > * {
-  display: none;
-}
+.favor-btn,
 .delete-btn {
-  display: none;
+  opacity: 0;
   transition: opacity 0.2s;
-  width: 100%;
-  height: 70px;
-  justify-content: center;
-  align-items: center;
 }
+.currency-card:hover .favor-btn,
 .currency-card:hover .delete-btn {
-  display: flex;
-  background: none;
+  opacity: 1;
 }
 </style>
