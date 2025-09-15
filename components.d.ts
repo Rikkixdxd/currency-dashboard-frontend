@@ -10,5 +10,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     CurrencyCard: typeof import('./src/components/CurrencyCard.vue')['default']
     Dashboard: typeof import('./src/components/Dashboard.vue')['default']
+    Graphs: typeof import('./src/components/Graphs.vue')['default']
   }
 }
