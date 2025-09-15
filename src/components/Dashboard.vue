@@ -79,7 +79,7 @@
       </template>
     </v-row>
   </v-container>
-  <Graphs v-if="selectedCurrency" :history="currencyStore.currencyHistory[selectedCurrency]" />
+  <!-- <Graphs v-if="selectedCurrency" :history="currencyStore.currencyHistory[selectedCurrency]" /> -->
 </template>
 
 <script setup>
