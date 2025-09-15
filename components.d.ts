@@ -8,6 +8,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CurrencyCard: typeof import('./src/components/CurrencyCard.vue')['default']
     Dashboard: typeof import('./src/components/Dashboard.vue')['default']
   }
 }
