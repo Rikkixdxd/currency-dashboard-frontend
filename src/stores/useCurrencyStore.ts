@@ -2,27 +2,22 @@ import type {
   Currency,
   CurrencyConvertToSelected,
   CurrencyPair,
+  CurrencyHistory,
 } from "@/types/CurrencyTypes";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
-const popularPairs = ref([
-  { base: "USD", target: "EUR", rate: "0.93" },
-  { base: "USD", target: "RUB", rate: "96.0" },
-  { base: "EUR", target: "USD", rate: "1.07" },
-  { base: "GBP", target: "USD", rate: "1.23" },
-  { base: "USD", target: "JPY", rate: "148.0" },
-]);
-
 export const useCurrency = defineStore("currency", () => {
   const selectedCurrency = ref<string | null>(null);
   const currencyListToSelected = ref<CurrencyConvertToSelected>({})
+  const currencyBaseTargetHistory = ref<CurrencyHistory>({})
+
   const popularCurrencyPairs = ref<CurrencyPair[]>([])
   const favoriteCurrencies = ref<Set<string>>(new Set())
 
   const currencyCodeList = computed(() => {
     const codes = new Set<string>();
-    popularPairs.value.forEach((pair) => {
+    popularCurrencyPairs.value.forEach((pair) => {
       codes.add(pair.base);
       codes.add(pair.target);
     });
@@ -31,7 +26,10 @@ export const useCurrency = defineStore("currency", () => {
 
   async function fetchCurrency(code: string): Promise<void> {
     const response = await fetch("http://localhost:5000/rates/" + code);
-    currencyListToSelected.value[code] = await response.json()
+    const data = await response.json()
+    currencyListToSelected.value[code] = data
+    
+    currencyBaseTargetHistory.value = updateHistory(currencyBaseTargetHistory.value, code)
   }
 
   async function fetchPopularPairs() {
@@ -56,6 +54,26 @@ export const useCurrency = defineStore("currency", () => {
   
   function getFavor() {
     favoriteCurrencies.value = new Set(JSON.parse(window.localStorage.getItem('favoriteCurrencyCodes') ?? '') ?? [])
+  }
+  
+  function updateHistory(history: CurrencyHistory, code: string) {
+    if (!history[code]) history[code] = []
+    currencyListToSelected.value[code].forEach((currency) => { // TODO: возможно избавиться от currencyListToSelected, отображать историю 
+      if (!history[currency.base][currency.target]) history[currency.base][currency.target] = []
+      
+      
+      // const delta = history[currency.base][currency.target].length ? (Number(currency.rate) - history[currency.base][currency.target][-1].rate) : 0
+      // console.log(history[currency.base][currency.target].length);
+      
+      history[currency.base][currency.target].push({
+        timestamp: Date.now(),
+        rate: Number(currency.rate),
+        delta: 1
+      })
+
+      if (history[currency.base][currency.target].length > 100) history[currency.base][currency.target].shift()
+    })
+    return history
   }
 
   return {
