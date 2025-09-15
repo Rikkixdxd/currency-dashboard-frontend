@@ -73,23 +73,7 @@
           sm="4"
           md="2"
         >
-          <v-card
-            class="d-flex flex-column align-center justify-center text-center"
-            :class="{'bg-amber-lighten-4': currencyStore.favoriteCurrencies.has(currency.target)}"
-            outlined
-            style="height: 70px"
-            @click="currencyStore.selectCurrency(currency.target)"
-          >
-            <div class="text-h6">
-              {{ currency.target }}
-            </div>
-            <div
-              v-if="currency.target !== currencyStore.selectedCurrency"
-              class="text-subtitle-1"
-            >
-              {{ currency.rate.toFixed(4) }}
-            </div>
-          </v-card>
+          <CurrencyCard :currency="currency"/>
         </v-col>
       </template>
     </v-row>
@@ -113,11 +97,11 @@ onMounted(() => {
   currencyStore.fetchPopularPairs(); // сразу при загрузке
   setInterval(() => {
     if (!currencyStore.selectedCurrency) {
-      // currencyStore.fetchPopularPairs()
+      currencyStore.fetchPopularPairs()
     } else {
-      // currencyStore.fetchCurrency(currencyStore.selectedCurrency)
+      currencyStore.fetchCurrency(currencyStore.selectedCurrency)
     }
-  }, 5000);
+  }, 1000);
 });
 </script>
 
@@ -131,8 +115,8 @@ onMounted(() => {
   height: 70px;
   transition: background-color 0.2s;
 }
-.favor-btn,
-.delete-btn {
+.currency-card .favor-btn,
+.currency-card .delete-btn {
   opacity: 0;
   transition: opacity 0.2s;
 }
