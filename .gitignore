@@ -20,3 +20,5 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+example1.png
+example2.png
