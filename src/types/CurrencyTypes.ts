@@ -1,14 +1,3 @@
-
-export type CurrencyConvertToSelected = {
-  [key: string]: CurrencyPair[];
-}
-
-export type CurrencyHistoryPoint = {
-  timestamp: number
-  rate: number
-  delta?: number
-}
-
 export type CurrencyHistory = {
   [base: string]: {
     [target: string]: CurrencyHistoryPoint[]
@@ -26,4 +15,9 @@ export type CurrencyPair = {
   target: string;
   rate: number;
   amount?: number;
+}
+
+export type CurrencyHistoryPoint = CurrencyPair & {
+  timestamp: number
+  delta: number
 }
