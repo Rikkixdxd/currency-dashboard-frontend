@@ -44,36 +44,19 @@
       </v-card>
     </div>
     <v-row dense>
-      <template v-if="!selectedCurrency">
+      <template
+        v-for="(base, baseIndex) in Object.keys(currencyStore.currencyPopularHistory)"
+      >
         <v-col
-          v-for="pair in currencyStore.popularCurrencyPairs"
-          :key="pair.base + pair.target"
+          v-for="(target, targetIndex) in Object.keys(currencyStore.currencyPopularHistory[base])"
+          :key="`${base}-${target}`"
           cols="6"
           sm="4"
           md="2"
         >
           <CurrencyCard
-            :currencyPoint="pair"
-            :showDetailed="true"
-          />
-        </v-col>
-      </template>
-
-      <template v-else>
-        <v-col
-          v-for="currencyPoint in currencyStore.currencyHistory[
-            selectedCurrency
-          ]"
-          :key="currencyPoint[currencyPoint.length - 1].timestamp"
-          cols="6"
-          sm="4"
-          md="2"
-        >
-          <CurrencyCard
-            :currencyPoint="currencyPoint[currencyPoint.length - 1]"
-            @click="
-              selectedCurrency = currencyPoint[currencyPoint.length - 1].target
-            "
+            :currencyPoints="currencyStore.currencyPopularHistory[base][target]"
+            :showDetailed="!selectedCurrency"
           />
         </v-col>
       </template>

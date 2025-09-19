@@ -23,19 +23,7 @@ export const useCurrency = defineStore("currency", () => {
     return codes;
   });
 
-  const popularCurrencyPairs = computed(() => {
-    const pairs: CurrencyHistoryPoint[] = [];
-    Object.keys(currencyPopularHistory.value).forEach(base => {
-      Object.keys(currencyPopularHistory.value[base]).forEach(target => {
-        const history = currencyPopularHistory.value[base][target];
-        if (history.length > 0) {
-          const last = history[history.length - 1];
-          pairs.push(last);
-        }
-      });
-    });
-    return pairs;
-  });
+  
 
   async function fetchCurrency(code: string): Promise<void> {
     const response = await fetch("http://localhost:5000/rates/" + code);
@@ -79,7 +67,7 @@ export const useCurrency = defineStore("currency", () => {
         delta,
       });
 
-      if (arr.length > 20) {
+      if (arr.length > 10) {
         arr.shift();
       }
     });
@@ -107,7 +95,6 @@ export const useCurrency = defineStore("currency", () => {
 
   return {
     currencyCodeList,
-    popularCurrencyPairs,
     fetchPopularPairs,
     fetchCurrency,
     favoriteCurrencies,

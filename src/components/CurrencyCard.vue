@@ -1,35 +1,35 @@
 <template>
   <v-card
-    :key="currencyPoint.timestamp"
+    :key="computedCurrencyPoint.timestamp"
     class="d-flex flex-column align-center justify-center text-center"
     :class="{
       'bg-amber-lighten-4': !showDetailed && currencyStore.favoriteCurrencies.has(
-        currencyPoint.target
+        computedCurrencyPoint.target
       ),
-      'glow-red': currencyPoint.delta < 0,
-      'glow-green': currencyPoint.delta > 0,
+      'glow-red': computedCurrencyPoint.delta < 0,
+      'glow-green': computedCurrencyPoint.delta > 0,
     }"
     outlined
     style="height: 70px"
   >
-    <div class="text-h6">{{ showDetailed ? (currencyPoint.base + ' →') : '' }}  {{ currencyPoint.target }}</div>
+    <div class="text-h6">{{ showDetailed ? (computedCurrencyPoint.base + ' →') : '' }}  {{ computedCurrencyPoint.target }}</div>
     <div class="text-subtitle-1">
-      {{ currencyPoint.rate?.toFixed(4) ?? "-" }}
+      {{ computedCurrencyPoint.rate?.toFixed(4) ?? "-" }}
     </div>
 
     <span
       class="position-absolute left-0 ml-4 delta-span"
-      :class="currencyPoint.delta > 0 ? 'delta-green' : 'delta-red'"
+      :class="computedCurrencyPoint.delta > 0 ? 'delta-green' : 'delta-red'"
     >
-      {{ currencyPoint.delta > 0 ? "+" : "" }}{{ currencyPoint.delta }}
+      {{ computedCurrencyPoint.delta > 0 ? "+" : "" }}{{ computedCurrencyPoint.delta }}
     </span>
 
     <button
       v-if="!showDetailed"
       class="favor-btn h-100 bg-amber-lighten-2 position-absolute right-0"
-      @click.stop="currencyStore.switchFavor(currencyPoint.target)"
+      @click.stop="currencyStore.switchFavor(computedCurrencyPoint.target)"
       :class="
-        currencyStore.favoriteCurrencies.has(currencyPoint.target)
+        currencyStore.favoriteCurrencies.has(computedCurrencyPoint.target)
           ? 'text-white'
           : 'text-grey'"
     >
@@ -41,13 +41,17 @@
 <script setup lang="ts">
 import { useCurrency } from "@/stores/useCurrencyStore";
 import type { CurrencyHistoryPoint } from "@/types/CurrencyTypes";
+import { computed } from "vue";
 
 const props = defineProps<{
-  currencyPoint: CurrencyHistoryPoint;
+  currencyPoints: CurrencyHistoryPoint[];
   showDetailed?: boolean;
 }>();
 
 const currencyStore = useCurrency();
+const computedCurrencyPoint = computed(() => {
+  return props.currencyPoints[props.currencyPoints.length - 1];
+});
 </script>
 
 <style scoped>
